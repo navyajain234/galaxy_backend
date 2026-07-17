@@ -1,0 +1,42 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Galaxy API Docs",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#16B38A",
+    "dark": "#0A7259"
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:support@galaxy.ai"
+    }
+  ],
+  "topbarCtaButton": {
+    "type": "github",
+    "url": "https://github.com/galaxy-ai/galaxy"
+  },
+  "anchors": [
+    {
+      "name": "API Reference",
+      "icon": "rectangle-terminal",
+      "url": "/api-reference"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/openapi.yaml"
+      ]
+    }
+  ],
+  "openapi": [
+    "openapi.yaml"
+  ]
+}

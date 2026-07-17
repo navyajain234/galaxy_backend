@@ -1,0 +1,103 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Workflow {
+  id        String   @id @default(cuid())
+  userId    String   // Clerk User ID
+  name      String   @default("Untitled Workflow")
+  
+  // React Flow State
+  nodes     Json     @default("[]") // Stores the React Flow nodes array
+  edges     Json     @default("[]") // Stores the React Flow edges array
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  runs      Run[]
+  
+  @@index([userId])
+}
+
+model Run {
+  id            String   @id @default(cuid())
+  workflowId    String
+  workflow      Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  userId        String   // Clerk User ID
+  
+  status        String   // "PENDING", "SUCCESS", "FAILED", "PARTIAL"
+  scope         String   // "FULL", "PARTIAL", "SINGLE"
+  error         String?  // Run-level failure message surfaced in the UI
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  durationMs    Int?
+  
+  nodeExecutions NodeExecution[]
+  creditCost    Int      @default(0)
+}
+
+model NodeExecution {
+  id          String   @id @default(cuid())
+  runId       String
+  run         Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  
+  nodeId      String   // The ID of the React Flow node (e.g. "Gemini #1")
+  nodeType    String   // "Crop Image", "Gemini 3.1 Pro", etc.
+  
+  status      String   // "SUCCESS", "FAILED"
+  inputsUsed  Json     // Snapshotted input values used for this run
+  outputData  Json?    // The result from this node (e.g., image URL, LLM text)
+  error       String?  // Error message if it failed
+  provider    String?
+  creditCost  Int      @default(0)
+  
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  durationMs  Int?
+}
+
+model User {
+  id        String   @id // Clerk user ID maps here directly
+  email     String   @unique
+  credits   Int      @default(100) // Initial ledger balance
+  
+  transactions CreditTransaction[]
+  apiKeys      ApiKey[]
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount      Int      // Negative for deductions, positive for refills
+  type        String   // "DEDUCTION", "REFILL", "BONUS"
+  description String?
+  referenceId String?  // ID of the run or node execution that triggered this
+  createdAt   DateTime @default(now())
+}
+
+model ApiKey {
+  id        String   @id // Maps directly to Unkey key ID
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  maskedKey String   // e.g. sk_live_***1234
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model WebhookConfig {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  events    Json     @default("[]") // Array of event names like "run.started", "run.completed"
+  secret    String   // HMAC secret for payload signature validation
+  createdAt DateTime @default(now())
+}

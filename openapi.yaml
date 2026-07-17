@@ -1,0 +1,97 @@
+openapi: 3.0.0
+info:
+  title: Galaxy Backend API
+  version: 1.0.0
+  description: Public API for triggering workflow executions and checking status.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+paths:
+  /run:
+    post:
+      summary: Trigger a new workflow execution
+      description: Triggers a new execution for a specific workflow.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - workflowId
+              properties:
+                workflowId:
+                  type: string
+                  description: The ID of the workflow to run.
+                inputs:
+                  type: object
+                  description: Custom inputs to inject into the workflow run.
+                webhookUrl:
+                  type: string
+                  description: Optional webhook URL to call when the run finishes.
+      responses:
+        "200":
+          description: Workflow triggered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId:
+                    type: string
+                  status:
+                    type: string
+        "401":
+          description: Unauthorized
+        "404":
+          description: Workflow not found
+  /run/{runId}:
+    get:
+      summary: Get workflow run status
+      description: Returns the status, cost, and outputs of a specific run.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Run status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId:
+                    type: string
+                  status:
+                    type: string
+                  workflowId:
+                    type: string
+                  startedAt:
+                    type: string
+                  completedAt:
+                    type: string
+                  error:
+                    type: string
+                    nullable: true
+                  creditCost:
+                    type: number
+                  output:
+                    type: object
+                    nullable: true
+        "401":
+          description: Unauthorized
+        "404":
+          description: Run not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
