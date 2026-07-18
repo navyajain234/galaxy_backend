@@ -52,7 +52,7 @@ server.tool(
   {
     workflowId: z.string().describe("The ID of the workflow to run"),
     userId: z.string().describe("The user ID requesting the run"),
-    inputValues: z.record(z.string()).optional()
+    inputValues: z.record(z.string(), z.string()).optional()
   },
   async ({ workflowId, userId, inputValues }) => {
     const workflow = await prisma.workflow.findUnique({
