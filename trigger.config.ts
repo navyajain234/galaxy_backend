@@ -1,5 +1,5 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
-import { aptExtension } from "@trigger.dev/build/extensions/core";
+import { ffmpeg } from "@trigger.dev/build/extensions/core";
 
 export default defineConfig({
   project: "proj_izlmwdfeifqkmpkkxuhe",
@@ -7,9 +7,7 @@ export default defineConfig({
   maxDuration: 3600,
   build: {
     extensions: [
-      aptExtension({
-        packages: ["ffmpeg"],
-      }),
+      ffmpeg(),
     ],
     external: ["@ffmpeg-installer/ffmpeg"],
   },
