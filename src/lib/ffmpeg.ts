@@ -1,11 +1,16 @@
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 import path from "path";
 import fs from "fs";
 
-// Type definition for ffmpegInstaller
-const installer = ffmpegInstaller as any;
-ffmpeg.setFfmpegPath(installer.path);
+try {
+  // Use the local installer if available
+  const installer = require("@ffmpeg-installer/ffmpeg");
+  if (installer && installer.path) {
+    ffmpeg.setFfmpegPath(installer.path);
+  }
+} catch (e) {
+  // Fall back to system ffmpeg installed via aptExtension in Trigger.dev
+}
 
 const OUTPUT_DIR = path.join(process.cwd(), "public", "outputs");
 
