@@ -32,8 +32,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Workflow not found or unauthorized" }, { status: 404 });
     }
 
-    let nodes = (workflow.nodes as any[]) || [];
-    let edges = (workflow.edges as any[]) || [];
+    const nodes = (workflow.nodes as any[]) || [];
+    const edges = (workflow.edges as any[]) || [];
 
     // Inject requested inputs into the RequestInputsNode
     const inputNode = nodes.find((n) => n.type === "RequestInputsNode");
