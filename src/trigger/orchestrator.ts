@@ -1,4 +1,5 @@
 import { task } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { NODE_REGISTRY } from "@/config/nodeRegistry";
 import {
@@ -200,7 +201,6 @@ export const workflowOrchestrator = task({
 
         // Validate resolvedInputs against node definition schema
         if (nodeDef) {
-          const { z } = await import("zod");
           const schemaMap: Record<string, z.ZodTypeAny> = {};
           nodeDef.inputs.forEach(input => {
             schemaMap[input.name] = input.schema;
@@ -210,8 +210,8 @@ export const workflowOrchestrator = task({
           
           if (!validation.success) {
             hasFailure = true;
-            const issues = validation.error.issues || validation.error.errors || [];
-            errorMessage = issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(", ");
+            const issues = validation.error.issues || [];
+            errorMessage = issues.map((e: any) => `${(e.path || []).join('.')}: ${e.message}`).join(", ");
             
             await prisma.nodeExecution.create({
               data: {
