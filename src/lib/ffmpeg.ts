@@ -4,11 +4,12 @@ import fs from "fs";
 
 try {
   // Use the local installer if available
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const installer = require("@ffmpeg-installer/ffmpeg");
   if (installer && installer.path) {
     ffmpeg.setFfmpegPath(installer.path);
   }
-} catch (e) {
+} catch {
   // Fall back to system ffmpeg installed via aptExtension in Trigger.dev
 }
 

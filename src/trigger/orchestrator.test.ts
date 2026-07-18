@@ -111,7 +111,7 @@ describe('Orchestrator', () => {
         edges: [],
         inputs: {}
       });
-    } catch (_e) {
+    } catch {
       // Ignore batch error
     }
 
