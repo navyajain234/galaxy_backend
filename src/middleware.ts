@@ -1,8 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher(['/', '/dashboard', '/sign-in(.*)', '/sign-up(.*)'])
+const _isPublicRoute = createRouteMatcher(['/', '/dashboard', '/sign-in(.*)', '/sign-up(.*)'])
 
-export default clerkMiddleware(async (auth, request) => {
+export default clerkMiddleware(async (_auth, _request) => {
   // temporarily disabled auth.protect() to debug 404 routing
   return;
 });

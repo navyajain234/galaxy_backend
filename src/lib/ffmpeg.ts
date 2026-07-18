@@ -17,7 +17,7 @@ function generateId() {
   return Math.random().toString(36).substring(2, 15);
 }
 
-export async function mergeVideos(videoUrls: string[], transition: string): Promise<string> {
+export async function mergeVideos(videoUrls: string[], _transition: string): Promise<string> {
   const outputFileName = `merged_${generateId()}.mp4`;
   const outputPath = path.join(OUTPUT_DIR, outputFileName);
   

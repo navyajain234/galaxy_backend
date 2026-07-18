@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { workflowOrchestrator } from './orchestrator';
 import prisma from '@/lib/prisma';
-import { NODE_REGISTRY } from '@/config/nodeRegistry';
 
 // Mock dependencies
 vi.mock('@/lib/prisma', () => ({
@@ -112,7 +111,7 @@ describe('Orchestrator', () => {
         edges: [],
         inputs: {}
       });
-    } catch (e) {
+    } catch (_e) {
       // Ignore batch error
     }
 
