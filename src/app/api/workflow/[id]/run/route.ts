@@ -139,23 +139,39 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
     });
 
-    // Trigger the Trigger.dev orchestrator task
-    const handle = await tasks.trigger("workflow-orchestrator", {
-      runId: run.id,
-      workflowId: id,
-      nodes,
-      edges,
-      inputs,
-    });
+    // Hide Vercel env vars from Trigger SDK to bypass branch environment matching
+    const originalVercel = process.env.VERCEL;
+    const originalVercelEnv = process.env.VERCEL_ENV;
+    const originalVercelUrl = process.env.VERCEL_URL;
+    const originalVercelGitCommitRef = process.env.VERCEL_GIT_COMMIT_REF;
+    delete process.env.VERCEL;
+    delete process.env.VERCEL_ENV;
+    delete process.env.VERCEL_URL;
+    delete process.env.VERCEL_GIT_COMMIT_REF;
 
-    // We can import auth from trigger.dev or just use it if already imported
-    // Wait, let's dynamically require or use it. We should import it at the top.
-    const { auth: triggerAuth } = await import("@trigger.dev/sdk/v3");
-    const publicToken = await triggerAuth.createPublicToken({
-      scopes: { read: { runs: [handle.id] } }
-    });
+    try {
+      // Trigger the Trigger.dev orchestrator task
+      const handle = await tasks.trigger("workflow-orchestrator", {
+        runId: run.id,
+        workflowId: id,
+        nodes,
+        edges,
+        inputs,
+      });
 
-    return NextResponse.json({ ...run, triggerRunId: handle.id, triggerToken: publicToken });
+      // We can import auth from trigger.dev or just use it if already imported
+      const { auth: triggerAuth } = await import("@trigger.dev/sdk/v3");
+      const publicToken = await triggerAuth.createPublicToken({
+        scopes: { read: { runs: [handle.id] } }
+      });
+
+      return NextResponse.json({ ...run, triggerRunId: handle.id, triggerToken: publicToken });
+    } finally {
+      if (originalVercel !== undefined) process.env.VERCEL = originalVercel;
+      if (originalVercelEnv !== undefined) process.env.VERCEL_ENV = originalVercelEnv;
+      if (originalVercelUrl !== undefined) process.env.VERCEL_URL = originalVercelUrl;
+      if (originalVercelGitCommitRef !== undefined) process.env.VERCEL_GIT_COMMIT_REF = originalVercelGitCommitRef;
+    }
   } catch (e: any) {
     console.error("Run trigger API error:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });

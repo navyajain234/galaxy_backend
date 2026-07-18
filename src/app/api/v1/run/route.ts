@@ -57,15 +57,32 @@ export async function POST(req: Request) {
       },
     });
 
-    // Trigger the Trigger.dev orchestrator task
-    await tasks.trigger("workflow-orchestrator", {
-      runId: run.id,
-      workflowId,
-      nodes,
-      edges,
-      inputs: actualInputs,
-      webhookUrl
-    });
+    // Hide Vercel env vars from Trigger SDK to bypass branch environment matching
+    const originalVercel = process.env.VERCEL;
+    const originalVercelEnv = process.env.VERCEL_ENV;
+    const originalVercelUrl = process.env.VERCEL_URL;
+    const originalVercelGitCommitRef = process.env.VERCEL_GIT_COMMIT_REF;
+    delete process.env.VERCEL;
+    delete process.env.VERCEL_ENV;
+    delete process.env.VERCEL_URL;
+    delete process.env.VERCEL_GIT_COMMIT_REF;
+
+    try {
+      // Trigger the Trigger.dev orchestrator task
+      await tasks.trigger("workflow-orchestrator", {
+        runId: run.id,
+        workflowId,
+        nodes,
+        edges,
+        inputs: actualInputs,
+        webhookUrl
+      });
+    } finally {
+      if (originalVercel !== undefined) process.env.VERCEL = originalVercel;
+      if (originalVercelEnv !== undefined) process.env.VERCEL_ENV = originalVercelEnv;
+      if (originalVercelUrl !== undefined) process.env.VERCEL_URL = originalVercelUrl;
+      if (originalVercelGitCommitRef !== undefined) process.env.VERCEL_GIT_COMMIT_REF = originalVercelGitCommitRef;
+    }
 
     if (webhookUrl) {
        console.log(`Webhook requested for run ${run.id} to ${webhookUrl}`);
